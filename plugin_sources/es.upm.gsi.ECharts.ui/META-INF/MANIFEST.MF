@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Version: 1.0.0
+Bundle-SymbolicName: es.upm.gsi.ECharts.ui; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: es.upm.gsi.ECharts;visibility:=reexport,
+ org.eclipse.xtext.ui,
+ org.eclipse.ui.editors;bundle-version="3.5.0",
+ org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.xtext.ui.shared,
+ org.eclipse.ui,
+ org.eclipse.xtext.builder,
+ org.antlr.runtime
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: es.upm.gsi.ECharts.ui,
+ es.upm.gsi.ECharts.ui.contentassist,
+ es.upm.gsi.ECharts.ui.contentassist.antlr,
+ es.upm.gsi.ECharts.ui.contentassist.antlr.internal;x-internal:=true,
+ es.upm.gsi.ECharts.ui.internal;x-internal:=true,
+ es.upm.gsi.ECharts.ui.labeling,
+ es.upm.gsi.ECharts.ui.outline,
+ es.upm.gsi.ECharts.ui.quickfix
+Bundle-Activator: es.upm.gsi.ECharts.ui.internal.DslEChartsActivator

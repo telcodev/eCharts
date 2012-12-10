@@ -1,0 +1,198 @@
+grammar es.upm.gsi.ECharts.DslECharts with org.eclipse.xtext.common.Terminals
+
+generate dslECharts "http://www.upm.es/gsi/ECharts/DslECharts"
+
+Root:
+//The first is to write the package and then define a machine
+package=Package
+imports+= Imports*
+machine+= Machine+
+;
+
+Package:
+	'package' name=ID ';';
+
+Imports:
+	'import' name=QualifiedName ('.*')?';';
+
+//top level machine definition  												----+----
+Machine:
+	(accessAndMachineModifier=AccessAndMachineModifiers) 'machine' name=ID '{'
+ 	//machine body
+ 	(machineBody=MachineBody)
+ 	'}';
+ 	
+//Various statements inside a machine body:
+//state definition, transition definition, host language
+// block, or machine constructor
+
+/*
+MachineBody:
+
+(hostBlock+=HostBlock)*
+(machineConstructor+=MachineConstructor)? 
+(states+=States)+ 
+(transition+=Transition)*;
+
+*/
+
+//to allow the writting one or more of hostBlock,MachineConstructor,States or Transitions, regardless of the order between each other.
+//when Uno had been resolved we can added other rules like Dos.
+Uno returns MachineBody:
+ Dos ({Uno.left=current} right=Dos)*;
+ 
+Dos returns MachineBody:
+hostBlock=HostBlock | machineConstructor=MachineConstructor | states=States | transition=Transition;
+
+MachineBody:
+Uno
+;
+
+
+AccessAndMachineModifiers:
+ accessModifier=AccessModifiers  (machineModifier=MachineModifier)?;
+ 
+enum AccessModifiers:
+	PRIVATE='private' | PUBLIC='public' | PROTECTED='protected' | FINAL='final' | ABSTRACT='abstract';
+
+MachineModifier:
+concurrent='concurrent';
+//end top level machine definition  											---------
+  
+//states  																		----+----
+States:  
+	(stateMods=StateModifiers)? 'state' name=QualifiedName  
+	(en=Entry)? (ex=Exit)?
+	//(':' submachine=SubMachine)?; 
+	//((':' submachine=SubMachine) | ';');
+	(':' ( (submachine=SubMachine) | (machineInvocations=MachineInvocation) ) | (';')); 
+  
+enum StateModifiers:
+	INITIAL='initial' | NONTERMINAL='nonterminal' | CONCURRENT='concurent';
+
+Entry:
+	'entry' a=Action;
+Exit:
+	'exit' a=Action;
+//end states  																	---------
+
+//machineConstructors  															----+----
+MachineConstructor: //public...
+'public' machineName=[Machine] '('paramsMachine=paramsDeclaration')' '{'
+//expressions
+//(expr+=(AdmiredExpression | AssingExpression) ';')+
+(expr+=Expression ('('STRING')' | '()')?';')+
+'}';
+
+MachineInvocation://params should be a cross reference, but I Don't know how to parse it.
+{MachineInvocation} ID('('paramsInvocation')' | '()') ';';
+
+paramsDeclaration:
+paramtype+=ID name+=ID | ((paramtype+=ID name+=ID ',')+ paramtype+=ID name+=ID);
+
+paramsInvocation:
+ID | ((ID ',')+ ID);
+
+//expressions
+Expression:
+('this.')? name=ID
+second=(AssingExpression | AdmiredExpression);
+//second=Addition;
+
+AssingExpression:
+'=' Addition;
+AdmiredExpression returns Expression:
+'!' Addition;
+
+Addition returns Expression: 
+//(alreadyExistValue=[Expression] | newValueId=ID | newValueInt=INT);
+ Multiplication ({Addtion.left=current} '+' right=Multiplication)*;
+
+Multiplication returns Expression:
+ Primary ({Multiplication.left=current} '*' right=Primary)*;
+ 
+Primary returns Expression:
+ NumberLiteral |
+ '(' Addition ')';
+
+NumberLiteral:
+valueINT=INT | valueID=QualifiedName | refValue=[Expression];
+
+
+QualifiedName:
+ID ('.'ID)*;
+
+
+//end machineConstructor  														---------
+
+//action  																		----+----
+Action:
+  ActionBlock | ActionStatement;
+
+ActionBlock: //to complet
+	name=STRING;
+ActionStatement: //to complet
+	name=STRING;
+//end actions  																	---------
+
+//transition  																	----+----
+Transition: //to complet, one case
+'transition' from=TargetTrn at=AssingTransition to=TargetTrn ';';
+
+TargetTrn:
+ (fromTo=SingleState) | ('[' fromToList=ListStates ']')
+;
+
+SingleState:
+fromTo=[States | QualifiedName];
+
+ListStates:
+((list+=SingleState ',')+ list+=SingleState);
+
+terminal AssingTransition:
+ ('-->') | 
+ ('- [' -> '] /' -> '->') |
+ ('-'ID '?' ID '/' -> '->'); //this not works.
+// (AT1 | AT2);
+
+/*
+AssingTransition:
+'-' 
+(Ttype1 | Ttype2 | Ttype3);
+
+Ttype1:
+'->';
+terminal Ttype2:
+'[' -> '] /' -> '->';
+terminal Ttype3:
+ ID '?' ID '/' -> '->';
+*/
+//end transition  																---------
+
+//hostBlock  																	----+----
+HostBlock: 
+ text=plainText;
+terminal plainText:
+'<* ' -> '*>';
+//end hostBlock  																---------
+
+//submachine  																	----+----
+SubMachine:
+'{'
+	(machineModifier=MachineModifier)? 
+	//(innerMachine=InnerMachine | externalMachine=ExternalMachine | reflectMachine=ReflectMachine |variableMachine=VariableMachine)
+	(MachineBody=MachineBody)
+'}';
+
+InnerMachine: //to complet
+name=ID;
+
+ExternalMachine:
+name=ID;
+
+ReflectMachine:
+name=ID;
+
+VariableMachine:
+name=ID;
+//end submachine  																---------

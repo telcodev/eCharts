@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <template name="Package" description="template for a Package"
+        id="es.upm.gsi.ECharts.DslECharts.Package"
+        context="es.upm.gsi.ECharts.DslECharts.Package"
+        enabled="true">package ${name};</template>
+    
+    <template name="Import" description="template for a Import"
+        id="es.upm.gsi.ECharts.DslECharts.Import"
+        context="es.upm.gsi.ECharts.DslECharts.Import"
+        enabled="true">import ${name} ;</template>
+	
+	<template name="Machine" description="template for a Machine"
+		id="es.upm.gsi.ECharts.DslECharts.Machine"
+		context="es.upm.gsi.ECharts.DslECharts.Machine"
+		enabled="true"> ${accessAndMachineModifier} machine ${name} {
+		${cursor}
+	}</template>
+	
+	<template name="Transition1" description="template for a Transition type 1 - from one source to one target"
+		id="es.upm.gsi.ECharts.DslECharts.Transition"
+		context="es.upm.gsi.ECharts.DslECharts.Transition"
+		enabled="true">transition ${TargetTrn:CrossReference('SingleState.fromTo')} --> ${TargetTrn:CrossReference('SingleState.fromTo')};
+		</template>
+</templates>
